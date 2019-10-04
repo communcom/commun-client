@@ -1,6 +1,6 @@
 import Basic from './basic';
 
 export default class List extends Basic {
-  _contractAccount = 'commun.list';
-  _contractActions = ['create', 'addinfo'];
+  _contractAccount = 'comn.list';
+  _contractActions = ['create', 'setsysparams', 'setinfo'];
 }

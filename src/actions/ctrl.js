@@ -1,7 +1,7 @@
 import Basic from './basic';
 
 export default class Ctrl extends Basic {
-  _contractAccount = 'commun.ctrl';
+  _contractAccount = 'comn.point';
   _contractActions = [
     'setparams',
     'validateprms',
