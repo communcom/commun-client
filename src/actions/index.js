@@ -8,7 +8,7 @@ import CyberStake from './cyber.stake';
 import CyberToken from './cyber.token';
 
 import Emit from './emit';
-import Gallery from './Gallery';
+import Gallery from './gallery';
 import List from './list';
 import Point from './point';
 import Publication from './publication';
