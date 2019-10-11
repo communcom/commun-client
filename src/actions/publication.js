@@ -22,5 +22,6 @@ export default class Publication extends Basic {
     'provide',
     'advise',
     'slap',
+    'report',
   ];
 }
