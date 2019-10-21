@@ -3,25 +3,24 @@ import Basic from './basic';
 export default class Publication extends Basic {
   _contractAccount = 'comn.gallery';
   _contractActions = [
-    'createmssg',
-    'updatemssg',
+    'create',
+    'update',
     'settags',
-    'deletemssg',
-    'reportmssg',
+    'remove',
+    'report',
+    'lock',
+    'unlock',
     'upvote',
     'downvote',
     'unvote',
     'claim',
     'hold',
     'transfer',
-    'setparams',
     'reblog',
     'erasereblog',
     'setproviders',
-    'setfrequency',
     'provide',
     'advise',
-    'slap',
-    'reportmssg',
+    'ban',
   ];
 }

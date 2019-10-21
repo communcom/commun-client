@@ -3,7 +3,6 @@ import Basic from './basic';
 export default class Gallery extends Basic {
   _contractAccount = 'comn.gallery';
   _contractActions = [
-    'create',
     'createmosaic',
     'addtomosaic',
     'claim',
@@ -11,6 +10,9 @@ export default class Gallery extends Basic {
     'transfer',
     'provide',
     'advise',
-    'slap',
+    'update',
+    'lock',
+    'unlock',
+    'ban',
   ];
 }
