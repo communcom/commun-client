@@ -2,6 +2,7 @@ import Basic from './basic';
 import Ctrl from './ctrl';
 
 import CyberDomain from './cyber.domain';
+import CyberGovern from './cyber.govern';
 import Cyber from './cyber';
 import CyberMsig from './cyber.msig';
 import CyberStake from './cyber.stake';
@@ -19,6 +20,7 @@ export default {
   ctrl: Ctrl,
 
   cyberDomain: CyberDomain,
+  CyberGovern: CyberGovern,
   cyber: Cyber,
   cyberMsig: CyberMsig,
   cyberStake: CyberStake,
