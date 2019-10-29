@@ -83,7 +83,7 @@ export default class BasicApi {
       msig = false,
       msigExpires = 600,
       provideBandwidthFor = null,
-      bandwidthProvider = 'cyber',
+      bandwidthProvider = 'c',
       delaySec = 0,
       expireSeconds = null,
       signByActors = null,
