@@ -15,21 +15,37 @@ export default class BasicApi {
       return;
     }
 
-    for (const action of this._contractActions) {
-      this[action] = function(contractAccount, actor, data, options) {
+    for (const actionName of this._contractActions) {
+      this[actionName] = function(contractAccount, auth, data, options) {
         if (typeof contractAccount !== 'string') {
           // action(actor, data, options)
-          [actor, data, options] = arguments;
+          [auth, data, options] = arguments;
           contractAccount = this._contractAccount;
         }
-        return this._transaction(contractAccount, action, actor, data, options);
+        return this._transaction(
+          [
+            {
+              contractAccount,
+              actionName,
+              auth,
+              data,
+            },
+          ],
+          options
+        );
       };
     }
   }
 
-  _verifyActor({ accountName } = {}) {
-    if (!accountName) {
-      throw new Error('Parameter "actor" should be an object with a field "accountName"');
+  _verifyAuth(authList) {
+    if (authList.length === 0) {
+      throw new Error('Empty "auth" parameter');
+    }
+
+    for (const { actor, accountName } of authList) {
+      if (!actor && !accountName) {
+        throw new Error('Item in "auth" should be an object with a field "actor"');
+      }
     }
   }
 
@@ -45,82 +61,119 @@ export default class BasicApi {
     }
   }
 
-  _validateTransactionOptions(contractAccount, actionName, actor, data) {
+  _validateTransactionOptions(contractAccount, actionName, authList, data) {
     this._verifyContractAccount(contractAccount);
     this._verifyApi();
-    this._verifyActor(actor);
+    this._verifyAuth(authList);
   }
 
-  prepareAction(contractAccount, actionName, actor, data) {
+  prepareAction(contractAccount, actionName, authList, data) {
     return {
       account: contractAccount,
       name: actionName,
-      authorization: [{ actor: actor.accountName, permission: actor.permission || 'active' }],
+      authorization: authList,
       data,
     };
   }
 
   _transaction = async (
-    contractAccount,
-    actionName,
-    actor,
-    data,
-    { broadcast = true, msig = false, msigExpires = 600, providebw = false, bwprovider = 'cyber' } = {}
+    actions,
+    {
+      broadcast = true,
+      msig = false,
+      msigExpires = 600,
+      provideBandwidthFor = null,
+      bandwidthProvider = 'cyber',
+      delaySec = 0,
+      expireSeconds = null,
+      signByActors = null,
+    } = {}
   ) => {
-    this._validateTransactionOptions(contractAccount, actionName, actor, data);
+    const preparedActions = actions.map(({ contractAccount, actionName, auth, data }) => {
+      const authList = this._normalizeAuth(auth);
 
-    const actions = [this.prepareAction(contractAccount, actionName, actor, data)];
+      this._validateTransactionOptions(contractAccount, actionName, authList, data);
+
+      return this.prepareAction(contractAccount, actionName, authList, data);
+    });
 
     if (msig) {
       return {
-        ...(await this._makeTransactionHeader({ expires: msigExpires })),
-        actions: await this.api.serializeActions(actions),
+        ...(await this._makeTransactionHeader({ expires: msigExpires, delaySec })),
+        actions: await this.api.serializeActions(preparedActions),
       };
     }
 
-    if (providebw) {
-      actions.push(
-        this.prepareAction(
-          'cyber',
-          'providebw',
-          { accountName: bwprovider, permission: 'providebw' },
-          {
-            provider: bwprovider,
-            account: actor.accountName,
-          }
-        )
-      );
+    if (provideBandwidthFor) {
+      const list = Array.isArray(provideBandwidthFor) ? provideBandwidthFor : [provideBandwidthFor];
+
+      for (const account of list) {
+        preparedActions.push(
+          this.prepareAction(
+            'cyber',
+            'providebw',
+            [
+              {
+                actor: bandwidthProvider,
+                permission: 'providebw',
+              },
+            ],
+            {
+              provider: bandwidthProvider,
+              account,
+            }
+          )
+        );
+      }
     }
 
-    if (broadcast || providebw) {
-      return await this.transact(actions, { providebw, broadcast });
+    if (!broadcast && !provideBandwidthFor) {
+      return preparedActions;
     }
 
-    return actions;
+    return await this.transact(
+      { actions: preparedActions, delay_sec: delaySec },
+      { providebw: Boolean(provideBandwidthFor), broadcast, signByActors, expireSeconds }
+    );
   };
 
-  async transact(actions, options) {
-    return await this.api.transact(
-      { actions },
-      {
-        ...options,
-        blocksBehind: BLOCKS_BEHIND,
-        expireSeconds: EXPIRE_SECONDS,
-      }
-    );
+  async transact(trx, options) {
+    return await this.api.transact(trx, {
+      ...options,
+      blocksBehind: BLOCKS_BEHIND,
+      expireSeconds: (options && options.expireSeconds) || EXPIRE_SECONDS,
+    });
   }
 
-  async _makeTransactionHeader({ expires }) {
+  async _makeTransactionHeader({ expires, delaySec }) {
     const info = await this.api.rpc.get_info();
     const refBlock = await this.api.rpc.get_block(info.head_block_num - BLOCKS_BEHIND);
 
     return {
       ...this.api.getDefaultTransactionHeader(),
       ...Serialize.transactionHeader(refBlock, expires),
+      delay_sec: delaySec,
     };
   }
 
-  sendActions(_, actions, options) {
-    return this.transact(actions, options);
+  _normalizeAuth(auth) {
+    if (!auth) {
+      return [];
+    }
+
+    let authList = auth;
+
+    if (!Array.isArray(auth)) {
+      authList = [auth];
+    }
+
+    return authList.map(({ actor, accountName, permission }) => ({
+      actor: actor || accountName,
+      permission: permission || 'active',
+    }));
+  }
+
+  executeActions(_, actions, options) {
+    return this._transaction(actions, options);
   }
 }
