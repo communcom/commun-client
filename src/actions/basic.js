@@ -87,6 +87,7 @@ export default class BasicApi {
       delaySec = 0,
       expireSeconds = null,
       signByActors = null,
+      skipSignByActors = null,
     } = {}
   ) => {
     const preparedActions = actions.map(({ contractAccount, actionName, auth, data }) => {
@@ -133,7 +134,7 @@ export default class BasicApi {
 
     return await this.transact(
       { actions: preparedActions, delay_sec: delaySec },
-      { providebw: Boolean(provideBandwidthFor), broadcast, signByActors, expireSeconds }
+      { providebw: Boolean(provideBandwidthFor), broadcast, signByActors, skipSignByActors, expireSeconds }
     );
   };
 
