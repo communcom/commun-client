@@ -1,7 +1,7 @@
 import Basic from './basic';
 
 export default class Gallery extends Basic {
-  _contractAccount = 'comn.gallery';
+  _contractAccount = 'c.gallery';
   _contractActions = [
     'createmosaic',
     'addtomosaic',
