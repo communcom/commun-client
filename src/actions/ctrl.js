@@ -11,6 +11,7 @@ export default class Ctrl extends Basic {
     'voteleader',
     'unvotelead',
     'claim',
+    'clearvotes',
     'changepoints',
     'approve',
     'cancel',
