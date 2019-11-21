@@ -22,18 +22,12 @@ export default class CyberCommun {
   }
 
   configure(args) {
-    if (this._configured) {
-      throw new Error('Already configured');
-    }
-
     this.rpc = args.rpc || new JsonRpc(args.endpoint, { fetch });
     this.signatureProvider = null;
 
     for (const action of Object.keys(Actions)) {
       this[action] = new Actions[action]();
     }
-
-    this._configured = true;
   }
 
   getActualAuth(accountName, privateKey, keyRole) {
