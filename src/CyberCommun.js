@@ -16,6 +16,8 @@ export default class CyberCommun {
   }
 
   constructor(args) {
+    this.signatureProvider = null;
+
     if (args !== lazyKey) {
       this.configure(args);
     }
@@ -23,7 +25,6 @@ export default class CyberCommun {
 
   configure(args) {
     this.rpc = args.rpc || new JsonRpc(args.endpoint, { fetch });
-    this.signatureProvider = null;
 
     for (const action of Object.keys(Actions)) {
       this[action] = new Actions[action]();
