@@ -7,8 +7,21 @@ import { getKeyPairFromPrivateOrMaster } from './auth';
 
 import Actions from './actions';
 
+// Using like Symbol, prevents using this arg from outside library.
+const lazyKey = {};
+
 export default class CyberCommun {
+  static createLazyInstance() {
+    return new CyberCommun(lazyKey);
+  }
+
   constructor(args) {
+    if (args !== lazyKey) {
+      this.configure(args);
+    }
+  }
+
+  configure(args) {
     this.rpc = args.rpc || new JsonRpc(args.endpoint, { fetch });
     this.signatureProvider = null;
 
