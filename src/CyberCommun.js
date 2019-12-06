@@ -16,6 +16,7 @@ export default class CyberCommun {
   }
 
   constructor(args) {
+    this.isConfigured = false;
     this.signatureProvider = null;
 
     if (args !== lazyKey) {
@@ -29,6 +30,8 @@ export default class CyberCommun {
     for (const action of Object.keys(Actions)) {
       this[action] = new Actions[action]();
     }
+
+    this.isConfigured = true;
   }
 
   getActualAuth(accountName, privateKey, keyRole) {
