@@ -12,12 +12,12 @@ export function getKeyPair(privateKey) {
   };
 }
 
-export function fromSeed(accountName, masterKey, permName) {
-  return ecc.seedPrivate(`${accountName}${permName}${masterKey}`);
+export function fromSeed(userId, masterKey, keyRole) {
+  return ecc.seedPrivate(`${userId}${keyRole}${masterKey}`);
 }
 
-export function getKeyPairByPermissionName(accountName, masterKey, permName) {
-  const privateKey = fromSeed(accountName, masterKey, permName);
+export function getKeyPairByPermissionName(userId, password, keyRole) {
+  const privateKey = fromSeed(userId, password, keyRole);
   const publicKey = ecc.privateToPublic(privateKey, 'GLS');
 
   return {
@@ -26,22 +26,22 @@ export function getKeyPairByPermissionName(accountName, masterKey, permName) {
   };
 }
 
-export function getFullKeyPairs(accountName, masterKey) {
+export function getFullKeyPairs(userId, password) {
   const keyPairs = {};
 
   for (const permName of authTypes) {
-    keyPairs[permName] = getKeyPairByPermissionName(accountName, masterKey, permName);
+    keyPairs[permName] = getKeyPairByPermissionName(userId, password, permName);
   }
 
   return keyPairs;
 }
 
-export function getKeyPairFromPrivateOrMaster(accountName, privateKey, keyRole = 'active') {
+export function getKeyPairFromPrivateOrMaster(userId, privateKey, keyRole = 'active') {
   let keys = {};
   try {
     keys = getKeyPair(privateKey);
   } catch (err) {
-    keys = getKeyPairByPermissionName(accountName, privateKey, keyRole);
+    keys = getKeyPairByPermissionName(userId, privateKey, keyRole);
   }
   return keys;
 }
@@ -82,11 +82,18 @@ export function sign(data, privateKey) {
   return ecc.Signature.sign(data, privateKey).toString();
 }
 
-export async function generateKeys(accountName, password) {
+export async function generateKeys(userId, password) {
   const master = password || `P${await ecc.randomKey()}`;
 
   return {
     master,
-    ...getFullKeyPairs(accountName, master),
+    ...getFullKeyPairs(userId, master),
   };
+}
+
+export function normalizeUserId(userId) {
+  return userId
+    .trim()
+    .toLowerCase()
+    .replace(/@.*$/, '');
 }

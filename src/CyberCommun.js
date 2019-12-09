@@ -3,7 +3,7 @@ import fetch from 'node-fetch'; // node only; not needed in browsers
 import JsSignatureProvider from 'cyberwayjs/dist/eosjs-jssig';
 import { TextEncoder, TextDecoder } from 'text-encoding'; // node only; native TextEncoder/Decoder
 
-import { getKeyPairFromPrivateOrMaster } from './auth';
+import { getKeyPairFromPrivateOrMaster, getKeyPairByPermissionName, normalizeUserId } from './auth';
 
 import Actions from './actions';
 
@@ -34,20 +34,27 @@ export default class CyberCommun {
     this.isConfigured = true;
   }
 
-  getActualAuth(accountName, privateKey, keyRole) {
-    const normalizedName = accountName
-      .trim()
-      .toLowerCase()
-      .replace(/@.*$/, '');
+  getActualAuth(userId, privateKey, keyRole) {
+    const normalizedUserId = normalizeUserId(userId);
 
     privateKey = privateKey.trim();
 
-    const keys = getKeyPairFromPrivateOrMaster(normalizedName, privateKey, keyRole);
+    const keyPair = getKeyPairFromPrivateOrMaster(normalizedUserId, privateKey, keyRole);
 
     return {
-      accountName: normalizedName,
-      actualKey: keys.privateKey,
-      publicKey: keys.publicKey,
+      userId: normalizedUserId,
+      ...keyPair,
+    };
+  }
+
+  extractKeyPair(userId, password, keyRole) {
+    const normalizedUserId = normalizeUserId(userId);
+
+    const keyPair = getKeyPairByPermissionName(normalizedUserId, password.trim(), keyRole);
+
+    return {
+      userId: normalizedUserId,
+      ...keyPair,
     };
   }
 
