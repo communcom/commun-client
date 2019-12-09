@@ -48,14 +48,7 @@ export default class CyberCommun {
   }
 
   extractKeyPair(userId, password, keyRole) {
-    const normalizedUserId = normalizeUserId(userId);
-
-    const keyPair = getKeyPairByPermissionName(normalizedUserId, password.trim(), keyRole);
-
-    return {
-      userId: normalizedUserId,
-      ...keyPair,
-    };
+    return getKeyPairByPermissionName(userId, password, keyRole);
   }
 
   initProvider(privateKey) {
