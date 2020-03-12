@@ -14,6 +14,7 @@ import List from './list';
 import Point from './point';
 import Publication from './publication';
 import Social from './social';
+import Recover from './recover';
 
 export default {
   basic: Basic,
@@ -32,4 +33,5 @@ export default {
   point: Point,
   publication: Publication,
   social: Social,
+  recover: Recover,
 };
