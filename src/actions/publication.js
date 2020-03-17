@@ -22,5 +22,7 @@ export default class Publication extends Basic {
     'provide',
     'advise',
     'ban',
+    'reblog',
+    'erasereblog',
   ];
 }
