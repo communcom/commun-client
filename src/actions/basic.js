@@ -174,7 +174,7 @@ export default class BasicApi {
     }));
   }
 
-  executeActions(actions, options) {
+  executeActions(_, actions, options) {
     return this._transaction(actions, options);
   }
 }
