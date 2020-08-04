@@ -1,7 +1,6 @@
 import { Api, JsonRpc } from 'cyberwayjs';
 import fetch from 'node-fetch'; // node only; not needed in browsers
 import JsSignatureProvider from 'cyberwayjs/dist/eosjs-jssig';
-import { TextEncoder, TextDecoder } from 'text-encoding'; // node only; native TextEncoder/Decoder
 
 import { getKeyPairFromPrivateOrMaster, getKeyPairByPermissionName, normalizeUserId } from './auth';
 
@@ -26,6 +25,10 @@ export default class CyberCommun {
 
   configure(args) {
     this.rpc = args.rpc || new JsonRpc(args.endpoint, { fetch });
+
+    // https://github.com/GolosChain/cyberwayjs#commonjs
+    this.textEncoder = args.textEncoder;
+    this.textDecoder = args.textDecoder;
 
     for (const action of Object.keys(Actions)) {
       this[action] = new Actions[action]();
@@ -60,8 +63,8 @@ export default class CyberCommun {
     this.api = new Api({
       rpc: this.rpc,
       signatureProvider: this.signatureProvider,
-      textDecoder: new TextDecoder(),
-      textEncoder: new TextEncoder(),
+      textEncoder: this.textEncoder,
+      textDecoder: this.textDecoder,
     });
 
     for (const action of Object.keys(Actions)) {
